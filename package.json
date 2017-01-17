@@ -1,10 +1,10 @@
 {
   "name": "dynamorse-test",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Test utilities for Streampunk Media's Node-RED nodes",
   "author": "Streampunk Media Ltd",
   "license": "Apache-2.0",
-  "devDependencies": {
+  "dependencies": {
     "ws": "^1.1.1",
     "tape": "^4.2.2"
   },
