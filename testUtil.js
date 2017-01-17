@@ -16,7 +16,7 @@
 var test = require('tape');
 var WebSocket = require('ws');
 var http = require('http');
-var Grain = require('node-red-contrib-dynamorse-core').Grain;
+var Grain = require('./Grain.js');
 
 var properties = {
   redPort: 1880,
@@ -203,4 +203,5 @@ module.exports = {
   properties: properties,
   testNodes: testNodes,
   testFlowId: testFlowId,
+  checkGrain: checkGrain
 };

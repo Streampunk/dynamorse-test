@@ -14,5 +14,5 @@
 */
 
 module.exports = {
-   TestUtil : require('testUtil.js')
+   TestUtil : require('./testUtil.js')
 };
