@@ -16,6 +16,7 @@
 var test = require('tape');
 var WebSocket = require('ws');
 var http = require('http');
+var Grain = require('node-red-contrib-dynamorse-core').Grain;
 
 var properties = {
   redPort: 1880,
@@ -181,6 +182,20 @@ var testNodes = {
     "y":100.0,
     "wires":[[]]
   })
+}
+
+checkGrain = function(t, obj) {
+  var g = new Grain(null, 
+                    obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode, 
+                    obj.flow_id, obj.source_id, obj.duration);
+  t.equal(obj.hasOwnProperty('payloadCount')?obj.payloadCount:0, 1, 'has single payload');
+  t.ok((obj.hasOwnProperty('payloadSize')?obj.payloadSize:0) > 0, 'has payload contents');
+  t.ok(g.ptpSync, 'has valid PTP sync timestamp');
+  t.ok(g.ptpOrigin, 'has valid PTP origin timestamp');
+  t.ok(g.flow_id, 'has valid flow id');
+  t.ok(g.source_id, 'has valid source id');
+  t.ok(g.duration, 'has valid duration');
+  return g;
 }
 
 module.exports = {
