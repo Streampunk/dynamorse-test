@@ -89,6 +89,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
         deleteFlow(t, flowId, function() {
           onComplete();
         });
+        doneClosedown = true;
       }
       lastCount = params.count;
     }
@@ -149,8 +150,25 @@ var testNodes = {
     "label": "Test Flow",
     "nodes": []
   }),
-  funnelTestNode: JSON.stringify({
-    "type": "funnelGen",
+  funnelGrainNode: JSON.stringify({
+    "type": "funnelGrain",
+    "z": `${testFlowId}`,
+    "name": "funnel",
+    "delay": 0,
+    "numPushes": 10,
+    "maxBuffer": 10,
+    "format": "video",
+    "width": "1920",
+    "height": "1080",
+    "channels": 2,
+    "bitsPerSample": 16,
+    "wsPort": `${properties.wsPort}`,
+    "x": 100.0,
+    "y": 100.0,
+    "wires": [[]]
+  }),
+  funnelCountNode: JSON.stringify({
+    "type": "funnelCount",
     "z": `${testFlowId}`,
     "name": "funnel",
     "delay": 0,
