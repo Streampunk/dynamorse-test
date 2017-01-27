@@ -62,14 +62,6 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
   req.end();
 }
 
-function deleteFlow(t, flowId, cb) {
-  t.comment('Delete test flow');
-  var testFlowDel = `{"id" : "${flowId}"}`;
-  adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, function(res) {
-    cb();
-  });
-}
-
 function postFlow(t, params, getFlow, wss, onMsg, done) {
   adminApiReq(t, 'POST', '/flow', JSON.stringify(getFlow(params)), 200, done, function(res) {
     t.ok(res.id, 'response has flow id');
@@ -78,6 +70,20 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
     var lastCount = -1;
     var endReceived = false;
     var doneClosedown = false;
+    var timeout = params.flowTimeout||1000;
+
+    function deleteFlow(t, flowId, cb) {
+      if (params.keepFlow) {
+        t.comment('!!! NOT deleting test flow !!!');
+        cb();
+      } else {
+        t.comment('Delete test flow');
+        var testFlowDel = `{"id" : "${flowId}"}`;
+        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, function(res) {
+          cb();
+        });
+      }
+    }
 
     function checkCompleted(t, flowId, onComplete) {
       if (doneClosedown) {
@@ -96,6 +102,11 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 
     wss.on('connection', function(ws) {
       t.equal(ws.readyState, WebSocket.OPEN, 'websocket connection is open');
+      var id = setInterval(checkCompleted, timeout, t, res.id, function() {
+        clearInterval(id);
+        done();
+      });
+
       t.comment('Check for expected data from flow');
       ws.on('message', function(msg) {
         //t.comment(`Message: ${msg}`);
@@ -104,16 +115,13 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
           endReceived = true;
           deleteFlow(t, res.id, function() {
             doneClosedown = true;
+            clearInterval(id);
+            done();
           });
         });
         if (msgObj.hasOwnProperty('close'))
           ws.close();
       });
-    });
-
-    var id = setInterval(checkCompleted, 100, t, res.id, function() {
-      clearInterval(id);
-      done();
     });
   });
 }
