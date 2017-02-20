@@ -1,14 +1,14 @@
 {
   "name": "dynamorse-test",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Test utilities for Streampunk Media's Node-RED nodes",
   "author": "Streampunk Media Ltd",
   "license": "Apache-2.0",
   "dependencies": {
-    "seamless-immutable": "^4.1.1",
+    "seamless-immutable": "^7.0.1",
     "tape": "^4.6.3",
-    "uuid": "^2.0.1",
-    "ws": "^1.1.1"
+    "uuid": "^3.0.1",
+    "ws": "^2.1.0"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-/* Copyright 2016 Streampunk Media Ltd.
+/* Copyright 2017 Streampunk Media Ltd.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
       'Content-Type' : 'application/json',
       'Content-Length' : payload.length
     }
-  }, function (res) {
+  }, (res) => {
     var statusCode = res.statusCode;
     var contentType = res.headers['content-type'];
 
@@ -47,13 +47,9 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
 
     res.setEncoding('utf8');
     var rawData = "";
-    res.on('data', function (chunk) {
-      rawData += chunk;
-    });
-    res.on('end', function () {
-      cb((204 === statusCode)?null:JSON.parse(rawData));
-    });
-  }).on("error", function(e) {
+    res.on('data', (chunk) => rawData += chunk);
+    res.on('end', () => cb((204 === statusCode)?null:JSON.parse(rawData)));
+  }).on("error", (e) => {
     t.fail(`problem with admin API '${method}' request to path '${path}': ${e.message}`);
     onError();
   });
@@ -63,7 +59,7 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
 }
 
 function postFlow(t, params, getFlow, wss, onMsg, done) {
-  adminApiReq(t, 'POST', '/flow', JSON.stringify(getFlow(params)), 200, done, function(res) {
+  adminApiReq(t, 'POST', '/flow', JSON.stringify(getFlow(params)), 200, done, (res) => {
     t.ok(res.id, 'response has flow id');
 
     params.count = 0;
@@ -79,9 +75,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       } else {
         t.comment('Delete test flow');
         var testFlowDel = `{"id" : "${flowId}"}`;
-        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, function(res) {
-          cb();
-        });
+        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, (res) => cb()); 
       }
     }
 
@@ -92,9 +86,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
         t.comment('Check for correct closedown');
         t.ok(endReceived, 'end message has been received');
         t.ok(doneClosedown, 'closedown has been completed');
-        deleteFlow(t, flowId, function() {
-          onComplete();
-        });
+        deleteFlow(t, flowId, () => onComplete());
         doneClosedown = true;
       }
       lastCount = params.count;
@@ -102,7 +94,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 
     wss.on('connection', function(ws) {
       t.equal(ws.readyState, WebSocket.OPEN, 'websocket connection is open');
-      var id = setInterval(checkCompleted, timeout, t, res.id, function() {
+      var id = setInterval(checkCompleted, timeout, t, res.id, () => {
         clearInterval(id);
         done();
       });
@@ -111,9 +103,9 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       ws.on('message', function(msg) {
         //t.comment(`Message: ${msg}`);
         var msgObj = JSON.parse(msg);
-        onMsg(t, params, msgObj, function() {
+        onMsg(t, params, msgObj, () => {
           endReceived = true;
-          deleteFlow(t, res.id, function() {
+          deleteFlow(t, res.id, () => {
             doneClosedown = true;
             clearInterval(id);
             done();
@@ -127,17 +119,15 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 }
 
 function nodeRedTest(description, params, getFlow, onMsg) {
-  test(description, function (t) {
-    var server = http.createServer(function(req, res){});
-    server.listen(properties.wsPort, 'localhost', function() {
+  test(description, (t) => {
+    var server = http.createServer((req, res) => {});
+    server.listen(properties.wsPort, 'localhost', () => {
       t.pass(`server is listening on port ${properties.wsPort}`);
 
       wss = new WebSocket.Server({ server: server });
-      wss.on('error', function (error) {
-        t.fail(`websocket server error: '${error}'`);
-      });
+      wss.on('error', (error) => t.fail(`websocket server error: '${error}'`));
 
-      postFlow(t, params, getFlow, wss, onMsg, function() {
+      postFlow(t, params, getFlow, wss, onMsg, () => {
         wss.close(function(err) {
           t.notOk(err, err?err:"websocket server closed OK");
           server.close(function(err) {
