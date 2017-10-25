@@ -1,14 +1,19 @@
 {
   "name": "dynamorse-test",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Test utilities for Streampunk Media's Node-RED nodes",
   "author": "Streampunk Media Ltd",
   "license": "Apache-2.0",
   "dependencies": {
-    "seamless-immutable": "^7.0.1",
-    "tape": "^4.6.3",
+    "eslint": "^4.9.0",
+    "tape": "^4.8.0",
     "uuid": "^2.0.1",
-    "ws": "^2.1.0"
+    "ws": "^3.2.0"
+  },
+  "scripts": {
+    "lint": "eslint **/*.js",
+    "lint-html": "eslint **/*.js -f html -o ./reports/lint-results.html",
+    "lint-fix": "eslint --fix **/*.js"
   },
   "repository": {
     "type": "git",
