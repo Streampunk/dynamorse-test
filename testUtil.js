@@ -37,19 +37,19 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
     var statusCode = res.statusCode;
     var contentType = res.headers['content-type'];
 
-    t.equal(statusCode, response, "status code is Success")
+    t.equal(statusCode, response, 'status code is Success');
     if (!((200 === statusCode) || (204 == statusCode))) {
       onError();
       return;
     }
     if (200 === statusCode)
-      t.ok(/^application\/json/.test(contentType), "content type is application/json")
+      t.ok(/^application\/json/.test(contentType), 'content type is application/json');
 
     res.setEncoding('utf8');
-    var rawData = "";
+    var rawData = '';
     res.on('data', (chunk) => rawData += chunk);
     res.on('end', () => cb((204 === statusCode)?null:JSON.parse(rawData)));
-  }).on("error", (e) => {
+  }).on('error', (e) => {
     t.fail(`problem with admin API '${method}' request to path '${path}': ${e.message}`);
     onError();
   });
@@ -75,7 +75,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       } else {
         t.comment('Delete test flow');
         var testFlowDel = `{"id" : "${flowId}"}`;
-        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, (res) => cb()); 
+        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, () => cb()); 
       }
     }
 
@@ -92,7 +92,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       lastCount = params.count;
     }
 
-    wss.on('connection', function(ws) {
+    wss.on('connection', ws => {
       t.equal(ws.readyState, WebSocket.OPEN, 'websocket connection is open');
       var id = setInterval(checkCompleted, timeout, t, res.id, () => {
         clearInterval(id);
@@ -100,7 +100,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       });
 
       t.comment('Check for expected data from flow');
-      ws.on('message', function(msg) {
+      ws.on('message', msg => {
         //t.comment(`Message: ${msg}`);
         var msgObj = JSON.parse(msg);
         onMsg(t, params, msgObj, () => {
@@ -120,18 +120,18 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 
 function nodeRedTest(description, params, getFlow, onMsg) {
   test(description, (t) => {
-    var server = http.createServer((req, res) => {});
+    var server = http.createServer((/*req, res*/) => {});
     server.listen(properties.wsPort, 'localhost', () => {
       t.pass(`server is listening on port ${properties.wsPort}`);
 
-      wss = new WebSocket.Server({ server: server });
+      const wss = new WebSocket.Server({ server: server });
       wss.on('error', (error) => t.fail(`websocket server error: '${error}'`));
 
       postFlow(t, params, getFlow, wss, onMsg, () => {
-        wss.close(function(err) {
-          t.notOk(err, err?err:"websocket server closed OK");
-          server.close(function(err) {
-            t.notOk(err, err?err:"http server closed OK");
+        wss.close(err => {
+          t.notOk(err, err?err:'websocket server closed OK');
+          server.close(err => {
+            t.notOk(err, err?err:'http server closed OK');
             t.end();
           });
         });
@@ -140,70 +140,70 @@ function nodeRedTest(description, params, getFlow, onMsg) {
   });
 }
 
-var testFlowId = "91ad451.f6e52b8";
+var testFlowId = '91ad451.f6e52b8';
 
 var testNodes = {
   baseTestFlow: JSON.stringify({
-    "id": `${testFlowId}`,
-    "label": "Test Flow",
-    "nodes": []
+    'id': `${testFlowId}`,
+    'label': 'Test Flow',
+    'nodes': []
   }),
   funnelGrainNode: JSON.stringify({
-    "type": "funnelGrain",
-    "z": `${testFlowId}`,
-    "name": "funnel",
-    "delay": 0,
-    "numPushes": 10,
-    "maxBuffer": 10,
-    "format": "video",
-    "width": "1920",
-    "height": "1080",
-    "channels": 2,
-    "bitsPerSample": 16,
-    "wsPort": `${properties.wsPort}`,
-    "x": 100.0,
-    "y": 100.0,
-    "wires": [[]]
+    'type': 'funnelGrain',
+    'z': `${testFlowId}`,
+    'name': 'funnel',
+    'delay': 0,
+    'numPushes': 10,
+    'maxBuffer': 10,
+    'format': 'video',
+    'width': '1920',
+    'height': '1080',
+    'channels': 2,
+    'bitsPerSample': 16,
+    'wsPort': `${properties.wsPort}`,
+    'x': 100.0,
+    'y': 100.0,
+    'wires': [[]]
   }),
   funnelCountNode: JSON.stringify({
-    "type": "funnelCount",
-    "z": `${testFlowId}`,
-    "name": "funnel",
-    "delay": 0,
-    "start": 0,
-    "end": 1,
-    "repeat": false,
-    "maxBuffer": 10,
-    "wsPort": `${properties.wsPort}`,
-    "x": 100.0,
-    "y": 100.0,
-    "wires": [[]]
+    'type': 'funnelCount',
+    'z': `${testFlowId}`,
+    'name': 'funnel',
+    'delay': 0,
+    'start': 0,
+    'end': 1,
+    'repeat': false,
+    'maxBuffer': 10,
+    'wsPort': `${properties.wsPort}`,
+    'x': 100.0,
+    'y': 100.0,
+    'wires': [[]]
   }),
   valveTestNode: JSON.stringify({
-    "type": "valveTest",
-    "z": `${testFlowId}`,
-    "name": "valve",
-    "maxBuffer": 10,
-    "multiplier": 1,
-    "x": 300.0,
-    "y": 100.0,
-    "wires": [[]]
+    'type': 'valveTest',
+    'z': `${testFlowId}`,
+    'name': 'valve',
+    'maxBuffer': 10,
+    'multiplier': 1,
+    'x': 300.0,
+    'y': 100.0,
+    'wires': [[]]
   }),
   spoutTestNode: JSON.stringify({
-    "type": "spoutTest",
-    "z": `${testFlowId}`,
-    "name": "spout",
-    "timeout":0,
-    "x":500.0,
-    "y":100.0,
-    "wires":[[]]
+    'type': 'spoutTest',
+    'z': `${testFlowId}`,
+    'name': 'spout',
+    'timeout':0,
+    'x':500.0,
+    'y':100.0,
+    'wires':[[]]
   })
-}
+};
 
-checkGrain = function(t, obj) {
+var checkGrain = function(t, obj) {
   var g = new Grain(null, 
-                    obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode, 
-                    obj.flow_id, obj.source_id, obj.duration);
+    obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode, 
+    obj.flow_id, obj.source_id, obj.duration);
   t.equal(obj.hasOwnProperty('payloadCount')?obj.payloadCount:0, 1, 'has single payload');
   t.ok((obj.hasOwnProperty('payloadSize')?obj.payloadSize:0) > 0, 'has payload contents');
   t.ok(g.ptpSync, 'has valid PTP sync timestamp');
@@ -212,7 +212,7 @@ checkGrain = function(t, obj) {
   t.ok(g.source_id, 'has valid source id');
   t.ok(g.duration, 'has valid duration');
   return g;
-}
+};
 
 module.exports = {
   nodeRedTest: nodeRedTest,

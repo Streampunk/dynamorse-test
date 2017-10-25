@@ -14,11 +14,10 @@
 */
 
 var uuid = require('uuid');
-var immutable = require('seamless-immutable');
 var Timecode = require('./Timecode.js');
 
 function Grain(buffers, ptpSync, ptpOrigin, timecode, flow_id,
-    source_id, duration) {
+  source_id, duration) {
 
   this.buffers = this.checkBuffers(buffers);
   this.ptpSync = this.checkTimestamp(ptpSync);
@@ -28,7 +27,6 @@ function Grain(buffers, ptpSync, ptpOrigin, timecode, flow_id,
   this.source_id = this.uuidToBuffer(source_id);
   this.duration = this.checkDuration(duration);
   return this;
-  //return immutable(this, { prototype : Grain.prototype });
 }
 
 Grain.prototype.checkBuffers = function (b) {
@@ -40,7 +38,7 @@ Grain.prototype.checkBuffers = function (b) {
     return b;
   }
   return undefined;
-}
+};
 
 Grain.prototype.uuidToBuffer = function (id) {
   try {
@@ -60,9 +58,9 @@ Grain.prototype.uuidToBuffer = function (id) {
     console.log(e);
     return undefined;
   }
-  console.log("Could not parse value '" + id + "' to a UUID.");
+  console.log('Could not parse value \'' + id + '\' to a UUID.');
   return undefined;
-}
+};
 
 Grain.prototype.checkTimestamp = function (t) {
   if (t === null || t === undefined) {
@@ -70,14 +68,14 @@ Grain.prototype.checkTimestamp = function (t) {
   }
   if (Buffer.isBuffer(t)) {
     if (t.length < 10) {
-      t = Buffer.concat([Buffer.alloc(10-t.length, fill(0)), t], 10);
+      t = Buffer.concat([Buffer.alloc(10-t.length, 0), t], 10);
     }
     return t.slice(-10);
   }
   if (typeof t === 'string') {
-    var m = t.match(/^([0-9]+):([0-9]+)$/)
+    var m = t.match(/^([0-9]+):([0-9]+)$/);
     if (m === null) {
-      console.log("Could not pattern match timestamp '" + t + "'.");
+      console.log('Could not pattern match timestamp \'' + t + '\'.');
       return undefined;
     }
     var b = Buffer.allocUnsafe(10);
@@ -86,7 +84,7 @@ Grain.prototype.checkTimestamp = function (t) {
     return b;
   }
   return undefined;
-}
+};
 
 const nineZeros = '000000000';
 
@@ -94,13 +92,13 @@ Grain.prototype.formatTimestamp = function (t) {
   if (t === null || t === undefined) return undefined;
   var nanos = t.readUInt32BE(6).toString();
   return t.readUIntBE(0, 6) + ':' + nineZeros.slice(nanos.length) + nanos;
-}
+};
 
 Grain.prototype.originAtRate = function (rate) {
   var nanos = this.ptpOrigin.readUInt32BE(6);
   var secs = this.ptpOrigin.readUIntBE(0, 6);
   return Math.floor((secs * rate) + (nanos / (1000000000 / rate)));
-}
+};
 
 Grain.prototype.checkTimecode = function (t) {
   if (t === null || t === undefined) {
@@ -108,7 +106,7 @@ Grain.prototype.checkTimecode = function (t) {
   }
   if (Buffer.isBuffer(t)) {
     if (t.length < 8) {
-      t = Buffer.concat([Buffer.alloc(8-t.length, fill(0)), t], 8);
+      t = Buffer.concat([Buffer.alloc(8-t.length, 0), t], 8);
     }
     return t.slice(-8);
   }
@@ -119,25 +117,25 @@ Grain.prototype.checkTimecode = function (t) {
     return new Timecode(t).buffer;
   }
   return undefined;
-}
+};
 
 Grain.prototype.formatTimecode = function (t) {
   if (t === null || t === undefined) return undefined;
   return new Timecode(t).toString();
-}
+};
 
 Grain.prototype.checkDuration = function (d) {
   if (d === null || d === undefined) return undefined;
   if (Buffer.isBuffer(d)) {
     if (d.length < 8) {
-      d = Buffer.concat([Buffer.alloc(8-t.length, 0), d], 8);
+      d = Buffer.concat([Buffer.alloc(8-d.length, 0), d], 8);
     }
     d = d.slice(-8);
     if (d.readUInt32BE(0) === 0) d[3] = 0x01;
     return d;
   }
   if (Array.isArray(d)) {
-    var b = Buffer.allocUnsafe(8);
+    let b = Buffer.allocUnsafe(8);
     b.writeUInt32BE(d[0]|0, 0);
     b.writeUInt32BE(d[1]|0, 4);
     return b;
@@ -145,18 +143,18 @@ Grain.prototype.checkDuration = function (d) {
   if (typeof d === 'string') {
     var m = d.match(/^([0-9]+)\/([1-9][0-9]*)$/);
     if (m === null) return undefined;
-    var b = Buffer.allocUnsafe(8);
+    let b = Buffer.allocUnsafe(8);
     b.writeUInt32BE(+m[1], 0);
     b.writeUInt32BE(+m[2], 4);
     return b;
   }
   return undefined;
-}
+};
 
 Grain.prototype.formatDuration = function (d) {
   if (d === undefined || d === null) return undefined;
   return d.readUInt32BE(0) + '/' + d.readUInt32BE(4);
-}
+};
 
 Grain.prototype.getDuration = function () {
   if (this.duration) {
@@ -164,7 +162,7 @@ Grain.prototype.getDuration = function () {
   } else {
     return [ NaN, NaN ];
   }
-}
+};
 
 Grain.prototype.getPayloadSize = function () {
   if (Array.isArray(this.buffers)) {
@@ -172,17 +170,17 @@ Grain.prototype.getPayloadSize = function () {
     return this.buffers.reduce((l, r) => l + r.length, 0);
   }
   return Buffer.isBuffer(this.buffers) ? this.buffers.length : 0;
-}
+};
 
 Grain.prototype.getOriginTimestamp = function () {
   return [ this.ptpOrigin.readUIntBE(0, 6), this.ptpOrigin.readUInt32BE(6) ];
-}
+};
 
 Grain.isGrain = function (x) {
   return x !== null &&
     typeof x === 'object' &&
     x.constructor === Grain.prototype.constructor;
-}
+};
 
 Grain.prototype.toJSON = function () {
   return {
@@ -196,6 +194,6 @@ Grain.prototype.toJSON = function () {
     source_id : uuid.unparse(this.source_id),
     duration : this.formatDuration(this.duration)
   };
-}
+};
 
 module.exports = Grain;
