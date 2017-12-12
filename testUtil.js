@@ -13,12 +13,12 @@
   limitations under the License.
 */
 
-var test = require('tape');
-var WebSocket = require('ws');
-var http = require('http');
-var Grain = require('./Grain.js');
+const test = require('tape');
+const WebSocket = require('ws');
+const http = require('http');
+const Grain = require('./Grain.js');
 
-var properties = {
+const properties = {
   redPort: 1880,
   wsPort: 1888
 };
@@ -75,7 +75,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       } else {
         t.comment('Delete test flow');
         var testFlowDel = `{"id" : "${flowId}"}`;
-        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, () => cb()); 
+        adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, () => cb());
       }
     }
 
@@ -143,66 +143,66 @@ function nodeRedTest(description, params, getFlow, onMsg) {
 var testFlowId = '91ad451.f6e52b8';
 
 var testNodes = {
-  baseTestFlow: JSON.stringify({
-    'id': `${testFlowId}`,
-    'label': 'Test Flow',
-    'nodes': []
+  baseTestFlow: () => ({
+    id: testFlowId,
+    label: 'Test Flow',
+    nodes: []
   }),
-  funnelGrainNode: JSON.stringify({
-    'type': 'funnelGrain',
-    'z': `${testFlowId}`,
-    'name': 'funnel',
-    'delay': 0,
-    'numPushes': 10,
-    'maxBuffer': 10,
-    'format': 'video',
-    'width': '1920',
-    'height': '1080',
-    'channels': 2,
-    'bitsPerSample': 16,
-    'wsPort': `${properties.wsPort}`,
-    'x': 100.0,
-    'y': 100.0,
-    'wires': [[]]
+  funnelGrainNode: () => ({
+    type: 'funnelGrain',
+    z: testFlowId,
+    name: 'funnel',
+    delay: 0,
+    numPushes: 10,
+    maxBuffer: 10,
+    format: 'video',
+    width: '1920',
+    height: '1080',
+    channels: 2,
+    bitsPerSample: 16,
+    wsPort: properties.wsPort,
+    x: 100.0,
+    y: 100.0,
+    wires: [[]]
   }),
-  funnelCountNode: JSON.stringify({
-    'type': 'funnelCount',
-    'z': `${testFlowId}`,
-    'name': 'funnel',
-    'delay': 0,
-    'start': 0,
-    'end': 1,
-    'repeat': false,
-    'maxBuffer': 10,
-    'wsPort': `${properties.wsPort}`,
-    'x': 100.0,
-    'y': 100.0,
-    'wires': [[]]
+  funnelCountNode: () => ({
+    type: 'funnelCount',
+    z: testFlowId,
+    name: 'funnel',
+    delay: 0,
+    start: 0,
+    end: 1,
+    repeat: false,
+    maxBuffer: 10,
+    wsPort: properties.wsPort,
+    x: 100.0,
+    y: 100.0,
+    wires: [[]]
   }),
-  valveTestNode: JSON.stringify({
-    'type': 'valveTest',
-    'z': `${testFlowId}`,
-    'name': 'valve',
-    'maxBuffer': 10,
-    'multiplier': 1,
-    'x': 300.0,
-    'y': 100.0,
-    'wires': [[]]
+  valveTestNode: () => ({
+    type: 'valveTest',
+    z: testFlowId,
+    name: 'valve',
+    maxBuffer: 10,
+    multiplier: 1,
+    x: 300.0,
+    y: 100.0,
+    wires: [[]]
   }),
-  spoutTestNode: JSON.stringify({
-    'type': 'spoutTest',
-    'z': `${testFlowId}`,
-    'name': 'spout',
-    'timeout':0,
-    'x':500.0,
-    'y':100.0,
-    'wires':[[]]
+  spoutTestNode: () => ({
+    type: 'spoutTest',
+    z: testFlowId,
+    name: 'spout',
+    timeout: 0,
+    x: 500.0,
+    y: 100.0,
+    wires: [[]]
   })
 };
 
-var checkGrain = function(t, obj) {
-  var g = new Grain(null, 
-    obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode, 
+var checkGrain = (t, obj) => {
+  var g = new Grain(null,
+    obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode,
     obj.flow_id, obj.source_id, obj.duration);
   t.equal(obj.hasOwnProperty('payloadCount')?obj.payloadCount:0, 1, 'has single payload');
   t.ok((obj.hasOwnProperty('payloadSize')?obj.payloadSize:0) > 0, 'has payload contents');

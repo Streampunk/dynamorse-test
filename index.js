@@ -13,6 +13,4 @@
   limitations under the License.
 */
 
-module.exports = {
-  TestUtil : require('./testUtil.js')
-};
+module.exports = require('./testUtil.js');
