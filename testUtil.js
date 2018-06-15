@@ -24,7 +24,7 @@ const properties = {
 };
 
 function adminApiReq(t, method, path, payload, response, onError, cb) {
-  var req = http.request({
+  let req = http.request({
     host: 'localhost',
     port : properties.redPort,
     path : path,
@@ -34,8 +34,8 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
       'Content-Length' : payload.length
     }
   }, (res) => {
-    var statusCode = res.statusCode;
-    var contentType = res.headers['content-type'];
+    let statusCode = res.statusCode;
+    let contentType = res.headers['content-type'];
 
     t.equal(statusCode, response, 'status code is Success');
     if (!((200 === statusCode) || (204 == statusCode))) {
@@ -46,7 +46,7 @@ function adminApiReq(t, method, path, payload, response, onError, cb) {
       t.ok(/^application\/json/.test(contentType), 'content type is application/json');
 
     res.setEncoding('utf8');
-    var rawData = '';
+    let rawData = '';
     res.on('data', (chunk) => rawData += chunk);
     res.on('end', () => cb((204 === statusCode)?null:JSON.parse(rawData)));
   }).on('error', (e) => {
@@ -63,10 +63,10 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
     t.ok(res.id, 'response has flow id');
 
     params.count = 0;
-    var lastCount = -1;
-    var endReceived = false;
-    var doneClosedown = false;
-    var timeout = params.flowTimeout||1000;
+    let lastCount = -1;
+    let endReceived = false;
+    let doneClosedown = false;
+    let timeout = params.flowTimeout||1000;
 
     function deleteFlow(t, flowId, cb) {
       if (params.keepFlow) {
@@ -74,7 +74,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
         cb();
       } else {
         t.comment('Delete test flow');
-        var testFlowDel = `{"id" : "${flowId}"}`;
+        let testFlowDel = `{"id" : "${flowId}"}`;
         adminApiReq(t, 'DELETE', `/flow/${flowId}`, testFlowDel, 204, cb, () => cb());
       }
     }
@@ -94,7 +94,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 
     wss.on('connection', ws => {
       t.equal(ws.readyState, WebSocket.OPEN, 'websocket connection is open');
-      var id = setInterval(checkCompleted, timeout, t, res.id, () => {
+      let id = setInterval(checkCompleted, timeout, t, res.id, () => {
         clearInterval(id);
         done();
       });
@@ -102,7 +102,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
       t.comment('Check for expected data from flow');
       ws.on('message', msg => {
         //t.comment(`Message: ${msg}`);
-        var msgObj = JSON.parse(msg);
+        let msgObj = JSON.parse(msg);
         onMsg(t, params, msgObj, () => {
           endReceived = true;
           deleteFlow(t, res.id, () => {
@@ -120,7 +120,7 @@ function postFlow(t, params, getFlow, wss, onMsg, done) {
 
 function nodeRedTest(description, params, getFlow, onMsg) {
   test(description, (t) => {
-    var server = http.createServer((/*req, res*/) => {});
+    let server = http.createServer((/*req, res*/) => {});
     server.listen(properties.wsPort, 'localhost', () => {
       t.pass(`server is listening on port ${properties.wsPort}`);
 
@@ -201,7 +201,7 @@ var testNodes = {
 };
 
 var checkGrain = (t, obj) => {
-  var g = new Grain(null,
+  let g = new Grain(null,
     obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode,
     obj.flow_id, obj.source_id, obj.duration);
   t.equal(obj.hasOwnProperty('payloadCount')?obj.payloadCount:0, 1, 'has single payload');
