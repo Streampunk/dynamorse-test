@@ -17,6 +17,13 @@ const test = require('tape');
 const WebSocket = require('ws');
 const http = require('http');
 const Grain = require('./Grain.js');
+const fs = require('fs');
+const util = require('util');
+const getUri = util.promisify(require('get-uri'));
+const [ mkdir, readdir, exists, lstat, rmdir, unlink ] =
+  [ fs.mkdir, fs.readdir, fs.exists, fs.lstat, fs.rmdir,
+    fs.unlink].map(util.promisify);
+const path = require('path');
 
 const properties = {
   redPort: 1880,
@@ -140,9 +147,9 @@ function nodeRedTest(description, params, getFlow, onMsg) {
   });
 }
 
-var testFlowId = '91ad451.f6e52b8';
+const testFlowId = '91ad451.f6e52b8';
 
-var testNodes = {
+const testNodes = {
   baseTestFlow: () => ({
     id: testFlowId,
     label: 'Test Flow',
@@ -200,7 +207,7 @@ var testNodes = {
   })
 };
 
-var checkGrain = (t, obj) => {
+const checkGrain = (t, obj) => {
   let g = new Grain(null,
     obj.ptpSyncTimestamp, obj.ptpOriginTimestamp, obj.timecode,
     obj.flow_id, obj.source_id, obj.duration);
@@ -214,10 +221,42 @@ var checkGrain = (t, obj) => {
   return g;
 };
 
+const download = async (uri, file) => {
+  try {
+    await mkdir(path.join(__dirname, 'tmp'));
+  } catch (e) {
+    if (e.code !== 'EEXIST') throw e;
+  }
+  let srcStream = await getUri(uri);
+  await new Promise((resolve, reject) => {
+    srcStream.pipe(fs.createWriteStream(path.join(__dirname, 'tmp', file))
+      .on('finish', resolve)
+      .on('error', reject));
+  });
+};
+
+const rimraf = async dir => {
+  if (await exists(dir)) {
+    let list = await readdir(dir);
+    await Promise.all(list.map(async name => {
+      let filename = path.join(dir, name);
+      let stat = await lstat(filename);
+      return stat.isDirectory() ? rimraf(filename) : unlink(filename);
+    }));
+    return rmdir(dir);
+  }
+};
+
+const delTmp = async () =>
+  rimraf(path.join(__dirname, 'tmp'));
+
 module.exports = {
   nodeRedTest: nodeRedTest,
   properties: properties,
   testNodes: testNodes,
   testFlowId: testFlowId,
-  checkGrain: checkGrain
+  checkGrain: checkGrain,
+  download: download,
+  rimraf: rimraf,
+  delTmp: delTmp
 };

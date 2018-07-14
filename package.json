@@ -1,6 +1,6 @@
 {
   "name": "dynamorse-test",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Test utilities for Streampunk Media's Node-RED nodes",
   "author": "Streampunk Media Ltd",
   "license": "Apache-2.0",
@@ -8,7 +8,8 @@
     "eslint": "^4.9.0",
     "tape": "^4.8.0",
     "uuid": "^2.0.1",
-    "ws": "^4.0.0"
+    "ws": "^4.0.0",
+    "get-uri": "^2.0.2"
   },
   "scripts": {
     "lint": "eslint **/*.js",
